@@ -67,6 +67,47 @@ chmod +x ./run-practical.sh
 ./run-practical.sh --all --open
 ```
 
+## Practical Automation Scripts (.sh)
+
+Scripts were created only where the practical can be automated end-to-end with CLI commands.
+
+1. [Practical 1 Script](scripts/practical-01-openssl.sh)
+2. [Practical 5 Script](scripts/practical-05-rsyslog-server.sh)
+3. [Practical 7 Script](scripts/practical-07-install-splunk.sh)
+4. [Practical 8 Script](scripts/practical-08-install-elk.sh)
+5. [Practical 9 Script](scripts/practical-09-install-graylog.sh)
+6. [Practical 10 Script](scripts/practical-10-normalize-logs.sh)
+
+Use launcher script:
+
+```bash
+chmod +x ./scripts/*.sh
+
+# List scriptable practicals
+./scripts/run-scriptable-practicals.sh --list
+
+# Run one scriptable practical
+./scripts/run-scriptable-practicals.sh --number 8
+
+# Run all scriptable practicals
+./scripts/run-scriptable-practicals.sh --all
+```
+
+Required environment variables for some scripts:
+
+```bash
+export OPENSSL_PASS='YourOpenSSLPassword'
+export SPLUNK_ADMIN_PASSWORD='YourSplunkAdminPassword'
+export GRAYLOG_ADMIN_PASSWORD='YourGraylogAdminPassword'
+```
+
+Skipped practicals (not fully automatable end-to-end):
+
+1. Practical 2 - Multi-terminal Mininet and live IDS interactions
+2. Practical 3 - Wireshark GUI object export workflow
+3. Practical 4 - Wireshark GUI packet exploration workflow
+4. Practical 6 - Requires cross-host client/server verification sequence
+
 ## Important Notes
 
 - These practicals are lab procedures, not a single executable software project.
