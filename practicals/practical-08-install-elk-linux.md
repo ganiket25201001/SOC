@@ -5,14 +5,19 @@ Install Java and Elasticsearch, then verify Elasticsearch service.
 
 ## Part 1: Install Java
 
-1. Update package index and install Java runtime.
+1. Update package index.
 
 ```bash
 sudo apt update
-sudo apt install default-jre
 ```
 
-2. Verify Java version.
+2. Install Java runtime and prerequisites.
+
+```bash
+sudo apt install -y default-jre curl gnupg apt-transport-https
+```
+
+3. Verify Java version.
 
 ```bash
 java -version
@@ -20,26 +25,31 @@ java -version
 
 ## Part 2: Install and Configure Elasticsearch
 
-1. Add Elasticsearch GPG key.
+1. Add Elasticsearch GPG key in keyring format.
 
 ```bash
-curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elastic-archive-keyring.gpg
 ```
 
 2. Add Elasticsearch repository.
 
 ```bash
-echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
+echo "deb [signed-by=/usr/share/keyrings/elastic-archive-keyring.gpg] https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-7.x.list
 ```
 
-3. Update and install Elasticsearch.
+3. Update package index.
 
 ```bash
 sudo apt update
-sudo apt install elasticsearch
 ```
 
-4. Edit Elasticsearch config.
+4. Install Elasticsearch.
+
+```bash
+sudo apt install -y elasticsearch
+```
+
+5. Edit Elasticsearch config.
 
 ```bash
 sudo nano /etc/elasticsearch/elasticsearch.yml
@@ -52,18 +62,35 @@ network.host: localhost
 http.port: 9200
 ```
 
-5. Start and enable Elasticsearch.
+6. Reload systemd.
+
+```bash
+sudo systemctl daemon-reload
+```
+
+7. Start Elasticsearch.
 
 ```bash
 sudo systemctl start elasticsearch
+```
+
+8. Enable Elasticsearch at boot.
+
+```bash
 sudo systemctl enable elasticsearch
 ```
 
-6. Test service response.
+9. Verify Elasticsearch service status.
 
 ```bash
-curl -X GET "localhost:9200"
+sudo systemctl status elasticsearch --no-pager
+```
+
+10. Verify Elasticsearch HTTP response.
+
+```bash
+curl -X GET "http://localhost:9200"
 ```
 
 ## Expected Result
-- Elasticsearch is up and responding on port 9200.
+- Elasticsearch is running and responds on port 9200.

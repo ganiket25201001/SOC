@@ -5,66 +5,85 @@ Install and configure an rsyslog server to receive remote logs.
 
 ## Steps
 
-1. Check rsyslog service status.
+1. Check current rsyslog status.
 
 ```bash
 sudo systemctl status rsyslog
 ```
 
-2. If not installed, install rsyslog.
+2. Update package index.
 
 ```bash
 sudo apt-get update
-sudo apt-get install rsyslog
 ```
 
-3. Open rsyslog configuration file.
+3. Install rsyslog if required.
 
 ```bash
-sudo nano /etc/rsyslog.conf
+sudo apt-get install -y rsyslog
 ```
 
-4. Enable UDP and TCP listeners by uncommenting or adding these lines:
+4. Create a dedicated remote logging config file.
+
+```bash
+sudo nano /etc/rsyslog.d/90-remote.conf
+```
+
+5. Add the following configuration:
 
 ```conf
 module(load="imudp")
 input(type="imudp" port="514")
+
 module(load="imtcp")
 input(type="imtcp" port="514")
-```
 
-5. Add remote log template before GLOBAL DIRECTIVES:
-
-```conf
 $template remote-incoming-logs,"/var/log/%HOSTNAME%/%PROGRAMNAME%.log"
 *.* ?remote-incoming-logs
 ```
 
-6. Restart rsyslog service.
+6. Validate rsyslog configuration syntax.
+
+```bash
+sudo rsyslogd -N1
+```
+
+7. Restart rsyslog service.
 
 ```bash
 sudo systemctl restart rsyslog
 ```
 
-7. Confirm listener ports.
+8. Enable rsyslog service.
 
 ```bash
-ss -tunelp | grep 514
+sudo systemctl enable rsyslog
 ```
 
-8. Allow firewall rules for syslog traffic.
+9. Confirm syslog listener ports are active.
+
+```bash
+ss -tunelp | grep ':514'
+```
+
+10. If UFW is enabled, allow TCP syslog port.
 
 ```bash
 sudo ufw allow 514/tcp
+```
+
+11. If UFW is enabled, allow UDP syslog port.
+
+```bash
 sudo ufw allow 514/udp
 ```
 
-9. Validate rsyslog configuration syntax.
+12. Check incoming log folder structure.
 
 ```bash
-sudo rsyslogd -N1 -f /etc/rsyslog.conf
+ls -l /var/log
 ```
 
 ## Expected Result
-- Server listens on TCP/UDP port 514.
-- Incoming logs are saved under /var/log/<hostname>/<program>.log.
+- Server listens on TCP and UDP port 514.
+- Remote logs are stored under `/var/log/<hostname>/<program>.log`.

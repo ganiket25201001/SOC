@@ -12,132 +12,170 @@ Monitor IDS alerts with Snort and block malicious traffic using iptables.
 
 1. In Oracle VirtualBox, set CyberOps Workstation adapter to Bridged mode.
 2. Start CyberOps Workstation VM.
-3. Configure network using DHCP script.
+3. Configure network with DHCP script.
 
 ```bash
 sudo ./lab.support.files/scripts/configure_as_dhcp.sh
 ```
 
-4. Verify connectivity.
+4. Check interface configuration.
 
 ```bash
 ifconfig
+```
+
+5. Test Internet reachability.
+
+```bash
 ping www.cisco.com
 ```
 
-## Part 2: Firewall and IDS Logs
+Press Ctrl+C to stop ping.
 
-### Step 1: Real-Time IDS Monitoring
+## Part 2: IDS Monitoring and Firewall Tuning
 
-1. Start Mininet.
+### A. Start Mininet and Snort
+
+1. Start Mininet from the CyberOps terminal.
 
 ```bash
 sudo ./lab.support.files/scripts/cyberops_extended_topo_no_fw.py
 ```
 
-2. Open R1 terminal from Mininet.
+2. At the `mininet>` prompt, open R1 terminal.
 
 ```bash
 xterm R1
 ```
 
-3. Start Snort on R1.
+3. In R1 terminal, start Snort.
 
 ```bash
 ./lab.support.files/scripts/start_snort.sh
 ```
 
-4. Open terminals for H5 and H10.
+4. Back at `mininet>` prompt, open H5 terminal.
 
 ```bash
 xterm H5
+```
+
+5. Back at `mininet>` prompt, open H10 terminal.
+
+```bash
 xterm H10
 ```
 
-5. Start malware web server on H10.
+6. In H10 terminal, start malware server.
 
 ```bash
 ./lab.support.files/scripts/mal_server_start.sh
 ```
 
-6. Verify service is listening on H10.
+7. In H10 terminal, verify listening service.
 
 ```bash
 netstat -tunpa
 ```
 
-7. Open another R1 terminal and monitor Snort alerts.
+8. Back at `mininet>`, open another R1 terminal for live alert monitoring.
 
 ```bash
 xterm R1
+```
+
+9. In the second R1 terminal, monitor Snort alerts.
+
+```bash
 tail -f /var/log/snort/alert
 ```
 
-8. From H5, download the test malware sample.
+### B. Trigger Alert and Capture Traffic
+
+1. In H5 terminal, download the sample file with `wget` to trigger IDS.
 
 ```bash
 wget 209.165.202.133:6666/W32.Nimda.Amm.exe
-# or
+```
+
+2. Alternative: download the same file with `curl`.
+
+```bash
 curl -O 209.165.202.133:6666/W32.Nimda.Amm.exe
 ```
 
-9. Optional packet capture from H5.
+3. Optional: start packet capture on H5.
 
 ```bash
 tcpdump -i h5-eth0 -w nimda.download.pcap &
-curl -O 209.165.202.133:6666/W32.Nimda.Amm.exe
-fg
-# press Ctrl+C to stop capture
 ```
 
-10. Verify capture file exists.
+4. While capture is running, trigger download again.
 
 ```bash
-ls -l
+curl -O 209.165.202.133:6666/W32.Nimda.Amm.exe
 ```
 
-### Step 2: Tune Firewall Rule Based on Alert
+5. Bring tcpdump back to foreground.
 
-1. Open third R1 terminal.
+```bash
+fg
+```
+
+Press Ctrl+C to stop tcpdump.
+
+6. Confirm capture file exists.
+
+```bash
+ls -l nimda.download.pcap
+```
+
+### C. Add Firewall Rule from IDS Findings
+
+1. Open a third R1 terminal from `mininet>`.
 
 ```bash
 xterm R1
 ```
 
-2. Review existing rules.
+2. Check current firewall rules.
 
 ```bash
 iptables -L -v
 ```
 
-3. Add blocking rule for malicious host/port.
+3. Block access to malicious host and port.
 
 ```bash
 iptables -I FORWARD -p tcp -d 209.165.202.133 --dport 6666 -j DROP
 ```
 
-4. Confirm rule is active.
+4. Re-check firewall rules.
 
 ```bash
 iptables -L -v
 ```
 
-5. Re-test file download from H5. It should be blocked.
+5. Re-test download from H5. Connection should now be blocked.
 
 ## Part 3: Stop and Clean Mininet
 
-1. In Mininet terminal, quit.
+1. In Mininet terminal, stop topology.
 
 ```bash
 quit
 ```
 
-2. Clean leftover Mininet processes.
+2. Clean Mininet processes.
 
 ```bash
 sudo mn -c
 ```
 
 ## Expected Result
-- Snort generates alerts when malware traffic crosses R1.
-- iptables rule blocks further downloads to destination 209.165.202.133:6666.
+- Snort creates alerts when malicious traffic crosses R1.
+- iptables rule blocks further downloads to 209.165.202.133:6666.
+
+## Notes
+- Perform this practical only in an isolated lab environment.
+- Keep the Snort alert window visible while generating traffic from H5.

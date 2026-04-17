@@ -16,7 +16,7 @@ apt-get install -y default-jre curl gnupg apt-transport-https
 java -version || true
 
 echo "Adding Elasticsearch repository key and source..."
-curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --dearmor -o "$ELASTIC_KEYRING"
+curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --batch --yes --dearmor -o "$ELASTIC_KEYRING"
 echo "deb [signed-by=$ELASTIC_KEYRING] https://artifacts.elastic.co/packages/7.x/apt stable main" > "$ELASTIC_LIST"
 
 echo "Installing Elasticsearch..."

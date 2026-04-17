@@ -3,38 +3,47 @@
 ## Aim
 Configure a Linux client to forward syslog messages to a central rsyslog server.
 
-## Prerequisite
-- Practical 5 completed on syslog server.
-- Syslog server IP example: 192.168.137.50
+## Prerequisites
+- Practical 5 completed on syslog server
+- Server IP available (example: 192.168.137.50)
 
-## Steps
+## Steps (Client Machine)
 
-1. On client machine, install rsyslog.
+1. Update package index on client machine.
 
 ```bash
 sudo apt-get update
-sudo apt-get install rsyslog
 ```
 
-2. Open rsyslog config.
+2. Install rsyslog if needed.
 
 ```bash
-sudo nano /etc/rsyslog.conf
+sudo apt-get install -y rsyslog
 ```
 
-3. Add forwarding rule at end of file.
+3. Create forwarding configuration file.
 
-Use either UDP or TCP:
+```bash
+sudo nano /etc/rsyslog.d/90-forward-to-server.conf
+```
+
+4. Add forwarding rule.
+
+Use one of the following:
+
+- UDP forwarding:
 
 ```conf
 *.* @192.168.137.50:514
 ```
 
+- TCP forwarding:
+
 ```conf
 *.* @@192.168.137.50:514
 ```
 
-4. Add queue settings for reliability if server is temporarily unavailable.
+5. Add queue reliability settings (recommended for forwarding).
 
 ```conf
 $ActionQueueFileName queue
@@ -44,23 +53,44 @@ $ActionQueueType LinkedList
 $ActionResumeRetryCount -1
 ```
 
-5. Save file and restart service.
+6. Restart rsyslog service.
 
 ```bash
 sudo systemctl restart rsyslog
 ```
 
-6. Verify on server side that client host directory is created.
+7. Enable rsyslog service.
 
 ```bash
-ls /var/log/
+sudo systemctl enable rsyslog
 ```
 
-7. Inspect incoming client logs on server.
+8. Send a test log entry from client.
+
+```bash
+logger "SOC Practical 6 test message from $(hostname)"
+```
+
+## Verification (Server Machine)
+
+1. Check whether client hostname folder appears.
+
+```bash
+ls -l /var/log
+```
+
+2. List received log files.
+
+```bash
+sudo find /var/log -maxdepth 2 -type f
+```
+
+3. If client hostname is known (example `kali`), monitor a log file.
 
 ```bash
 sudo tail -f /var/log/kali/rsyslogd.log
 ```
 
 ## Expected Result
-- Client logs are forwarded to the server and stored under server-side host directory.
+- Client logs are forwarded and stored on server under client hostname directory.
+- Test message sent with `logger` is visible on server.

@@ -5,42 +5,70 @@ Use Wireshark to identify and export an executable transferred over HTTP from a 
 
 ## Lab Environment
 - CyberOps Workstation VM
-- File: nimda.download.pcap
+- Capture file: nimda.download.pcap
 
 ## Steps
 
-1. Open terminal and go to capture directory.
+1. Open terminal and move to PCAP folder.
 
 ```bash
-cd ./lab.support.files/pcaps/
-ls -l
+cd /home/analyst/lab.support.files/pcaps
 ```
 
-2. Open the capture in Wireshark.
+2. Verify capture file exists.
+
+```bash
+ls -l nimda.download.pcap
+```
+
+3. Open the capture in Wireshark.
+
+```bash
+wireshark nimda.download.pcap
+```
+
+If `wireshark` is unavailable, try:
 
 ```bash
 wireshark-gtk nimda.download.pcap
 ```
 
-3. In Wireshark, inspect HTTP traffic and identify host and full URL.
-4. Right-click a related packet, then choose Follow > TCP Stream.
-5. Note the original filename from stream contents.
-6. Export the file from HTTP objects.
+4. In Wireshark, apply a filter to focus on HTTP traffic.
 
-Path in UI:
+```text
+http
+```
+
+5. Find the HTTP transfer for the malware object and inspect details:
+- Identify source host and full URL
+- Right-click related packet
+- Select Follow > TCP Stream
+
+6. Note the original filename shown in stream or HTTP headers.
+
+7. Export file object from Wireshark UI:
 - File > Export Objects > HTTP
 - Select W32.Nimda.Amm.exe
 - Click Save As
 
-7. Verify the exported file in terminal.
+8. Verify exported file from terminal.
 
 ```bash
-ls -l
+ls -l W32.Nimda.Amm.exe
+```
+
+9. Check file type from terminal.
+
+```bash
 file W32.Nimda.Amm.exe
 ```
 
-8. Optional validation: upload hash or file to VirusTotal in a safe environment.
+10. Optional safe validation: submit file hash to VirusTotal from an isolated lab system.
 
 ## Expected Result
-- The executable is recovered from the PCAP and saved locally.
-- File metadata confirms it is an executable sample.
+- Executable is successfully extracted from the PCAP.
+- File metadata confirms executable content.
+
+## Notes
+- Do not execute the extracted file.
+- Keep analysis strictly in a controlled lab environment.

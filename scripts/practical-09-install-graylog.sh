@@ -71,11 +71,19 @@ apt-get install -y graylog-server
 password_secret="$(pwgen -N 1 -s 96)"
 root_password_sha2="$(echo -n "$GRAYLOG_ADMIN_PASSWORD" | sha256sum | awk '{print $1}')"
 
+escape_sed_replacement() {
+  printf '%s' "$1" | sed -e 's/[&|\\]/\\&/g'
+}
+
 set_conf_value() {
   local key="$1"
   local value="$2"
+  local escaped_value
+
+  escaped_value="$(escape_sed_replacement "$value")"
+
   if grep -Eq "^[#[:space:]]*${key}[[:space:]]*=" "$GRAYLOG_CONF"; then
-    sed -i -E "s|^[#[:space:]]*${key}[[:space:]]*=.*|${key} = ${value}|" "$GRAYLOG_CONF"
+    sed -i -E "s|^[#[:space:]]*${key}[[:space:]]*=.*|${key} = ${escaped_value}|" "$GRAYLOG_CONF"
   else
     echo "${key} = ${value}" >> "$GRAYLOG_CONF"
   fi
