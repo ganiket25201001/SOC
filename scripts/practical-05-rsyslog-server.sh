@@ -10,18 +10,58 @@ echo "Installing rsyslog if needed..."
 apt-get update
 apt-get install -y rsyslog
 
-CONFIG_FILE="/etc/rsyslog.d/90-soc-remote-server.conf"
-cat > "$CONFIG_FILE" <<'EOF'
-# SOC Practical 5: remote syslog server
-module(load="imudp")
-input(type="imudp" port="514")
+CONFIG_FILE="/etc/rsyslog.conf"
 
-module(load="imtcp")
-input(type="imtcp" port="514")
+ensure_line_before_global_directives() {
+  local line="$1"
+  local tmp_file
 
-$template remote-incoming-logs,"/var/log/%HOSTNAME%/%PROGRAMNAME%.log"
-*.* ?remote-incoming-logs
-EOF
+  tmp_file="$(mktemp)"
+  awk -v line="$line" '
+    !inserted && /GLOBAL DIRECTIVES/ {
+      print line
+      inserted=1
+    }
+    { print }
+    END {
+      if (!inserted) {
+        print line
+      }
+    }
+  ' "$CONFIG_FILE" > "$tmp_file"
+  cat "$tmp_file" > "$CONFIG_FILE"
+  rm -f "$tmp_file"
+}
+
+echo "Updating $CONFIG_FILE for remote reception..."
+sed -i 's/^[[:space:]]*#[[:space:]]*module(load="imudp")[[:space:]]*$/module(load="imudp")/' "$CONFIG_FILE"
+sed -i 's/^[[:space:]]*#[[:space:]]*input(type="imudp" port="514")[[:space:]]*$/input(type="imudp" port="514")/' "$CONFIG_FILE"
+sed -i 's/^[[:space:]]*#[[:space:]]*module(load="imtcp")[[:space:]]*$/module(load="imtcp")/' "$CONFIG_FILE"
+sed -i 's/^[[:space:]]*#[[:space:]]*input(type="imtcp" port="514")[[:space:]]*$/input(type="imtcp" port="514")/' "$CONFIG_FILE"
+
+if ! grep -Eq '^[[:space:]]*module\(load="imudp"\)[[:space:]]*$' "$CONFIG_FILE"; then
+  ensure_line_before_global_directives 'module(load="imudp")'
+fi
+
+if ! grep -Eq '^[[:space:]]*input\(type="imudp" port="514"\)[[:space:]]*$' "$CONFIG_FILE"; then
+  ensure_line_before_global_directives 'input(type="imudp" port="514")'
+fi
+
+if ! grep -Eq '^[[:space:]]*module\(load="imtcp"\)[[:space:]]*$' "$CONFIG_FILE"; then
+  ensure_line_before_global_directives 'module(load="imtcp")'
+fi
+
+if ! grep -Eq '^[[:space:]]*input\(type="imtcp" port="514"\)[[:space:]]*$' "$CONFIG_FILE"; then
+  ensure_line_before_global_directives 'input(type="imtcp" port="514")'
+fi
+
+if ! grep -Eq '^[[:space:]]*\$template[[:space:]]+remote-incoming-logs,"/var/log/%HOSTNAME%/%PROGRAMNAME%\.log"[[:space:]]*$' "$CONFIG_FILE"; then
+  ensure_line_before_global_directives '$template remote-incoming-logs,"/var/log/%HOSTNAME%/%PROGRAMNAME%.log"'
+fi
+
+if ! grep -Eq '^[[:space:]]*\*\.\*[[:space:]]+\?remote-incoming-logs[[:space:]]*$' "$CONFIG_FILE"; then
+  ensure_line_before_global_directives '*.* ?remote-incoming-logs'
+fi
 
 echo "Validating rsyslog config..."
 rsyslogd -N1 -f /etc/rsyslog.conf
