@@ -1,49 +1,35 @@
-# Practical 6: Configure Linux Client to Send Logs to Syslog Server
+# Practical 6: Forward Logs to Syslog Server
 
 ## Aim
-Configure a Linux client to forward syslog messages to a central rsyslog server.
+Configure your Linux system to send syslog messages to a syslog server and read them.
 
-## Prerequisites
-- Practical 5 completed on syslog server
-- Server IP available (example: 192.168.137.50)
+## Steps
 
-## Steps (Client Machine)
+1. Install and configure rsyslog server first. For this, refer Practical 5.
 
-1. Update package index on client machine.
+2. Open Kali Linux and install rsyslog using the following commands:
 
 ```bash
 sudo apt-get update
+sudo apt-get install rsyslog
 ```
 
-2. Install rsyslog if needed.
+3. Open rsyslog configuration file:
 
 ```bash
-sudo apt-get install -y rsyslog
+sudo nano /etc/rsyslog.conf
 ```
 
-3. Create forwarding configuration file.
-
-```bash
-sudo nano /etc/rsyslog.d/90-forward-to-server.conf
-```
-
-4. Add forwarding rule.
-
-Use one of the following:
-
-- UDP forwarding:
+4. Add the following lines at the end of the file:
 
 ```conf
-*.* @192.168.137.50:514
-```
-
-- TCP forwarding:
-
-```conf
+@192.168.137.50:514
 *.* @@192.168.137.50:514
 ```
 
-5. Add queue reliability settings (recommended for forwarding).
+Note: Use `@` to send logs over UDP. Use `@@` for TCP.
+
+5. Add the following queue variables:
 
 ```conf
 $ActionQueueFileName queue
@@ -53,44 +39,24 @@ $ActionQueueType LinkedList
 $ActionResumeRetryCount -1
 ```
 
-6. Restart rsyslog service.
+6. Save and exit the file.
+
+7. Restart the rsyslog service:
 
 ```bash
 sudo systemctl restart rsyslog
 ```
 
-7. Enable rsyslog service.
+8. Go to your rsyslog server to verify logs from your client machine:
 
 ```bash
-sudo systemctl enable rsyslog
+ls /var/log/
 ```
 
-8. Send a test log entry from client.
+In this example, `kali` is the client machine name.
 
-```bash
-logger "SOC Practical 6 test message from $(hostname)"
-```
-
-## Verification (Server Machine)
-
-1. Check whether client hostname folder appears.
-
-```bash
-ls -l /var/log
-```
-
-2. List received log files.
-
-```bash
-sudo find /var/log -maxdepth 2 -type f
-```
-
-3. If client hostname is known (example `kali`), monitor a log file.
+9. To check logs, inspect rsyslogd.log:
 
 ```bash
 sudo tail -f /var/log/kali/rsyslogd.log
 ```
-
-## Expected Result
-- Client logs are forwarded and stored on server under client hostname directory.
-- Test message sent with `logger` is visible on server.
