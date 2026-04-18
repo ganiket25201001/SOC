@@ -14,8 +14,7 @@ Configure your Linux system to send syslog messages to a syslog server and read 
 2. Open Kali Linux and install rsyslog using the following commands:
 
 ```bash
-sudo apt-get update
-sudo apt-get install rsyslog
+sudo apt-get update && sudo apt-get install rsyslog
 ```
 
 3. Open rsyslog configuration file:
