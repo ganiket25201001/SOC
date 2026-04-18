@@ -81,4 +81,7 @@ fi
 echo "Checking listening ports..."
 ss -tunelp | grep ':514' || true
 
+echo "Final verification of rsyslog configuration..."
+rsyslogd -N1 -f /etc/rsyslog.conf
+
 echo "Practical 5 completed successfully."
