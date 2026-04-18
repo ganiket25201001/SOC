@@ -3,6 +3,9 @@
 ## Aim
 Monitor IDS alerts with Snort and block malicious traffic using iptables.
 
+## Tips
+- Use CyberOps Workstation and run the full commands exactly as shown.
+
 ## Lab Environment
 - CyberOps Workstation VM
 - Mininet lab topology

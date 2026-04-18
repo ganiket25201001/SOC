@@ -3,6 +3,9 @@
 ## Aim
 Install Graylog with Elasticsearch and MongoDB, then access the Graylog web interface.
 
+## Tips
+- Use Ubuntu and follow commands only.
+
 ## Prerequisites
 - Practical 8 completed (Java + Elasticsearch installed)
 - Server has Internet access

@@ -3,6 +3,9 @@
 ## Aim
 Use Wireshark to identify and export an executable transferred over HTTP from a packet capture.
 
+## Tips
+- Use CyberOps Workstation and make sure Wireshark is available.
+
 ## Lab Environment
 - CyberOps Workstation VM
 - Capture file: nimda.download.pcap

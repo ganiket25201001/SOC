@@ -3,6 +3,9 @@
 ## Aim
 Normalize Unix epoch timestamps into human-readable format using AWK.
 
+## Tips
+- Use CyberOps Workstation and run the full commands exactly as shown.
+
 ## Part 1: Normalize `applicationX` Log File
 
 1. Move to lab files directory.

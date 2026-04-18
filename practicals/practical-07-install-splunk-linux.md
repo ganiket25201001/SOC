@@ -3,6 +3,9 @@
 ## Aim
 Install Splunk Enterprise on Linux and access its web interface.
 
+## Tips
+- Use Ubuntu and follow commands only.
+
 ## Steps
 
 1. Move to temporary directory.

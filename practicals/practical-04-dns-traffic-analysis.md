@@ -3,6 +3,9 @@
 ## Aim
 Capture DNS traffic and analyze DNS query and response structure in Wireshark.
 
+## Tips
+- Use CyberOps Workstation and make sure Wireshark is available.
+
 ## Part 1: Capture DNS Traffic
 
 1. Open Wireshark and start capture on an active network interface.

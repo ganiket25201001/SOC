@@ -3,6 +3,9 @@
 ## Aim
 Configure your Linux system to send syslog messages to a syslog server and read them.
 
+## Tips
+- Use Kali for this practical; run the last-step command on Ubuntu.
+
 ## Prerequisites
 - Practical 5 (rsyslog server setup) is completed.
 - Syslog server IP address is available (example: 192.168.137.50).

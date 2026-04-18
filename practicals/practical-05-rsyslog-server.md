@@ -3,6 +3,9 @@
 ## Aim
 Install and configure an rsyslog server to receive remote logs.
 
+## Tips
+- Use Ubuntu and follow commands only.
+
 ## Steps
 
 1. Check current rsyslog status.

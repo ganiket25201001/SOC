@@ -3,6 +3,9 @@
 ## Aim
 Encrypt and decrypt a text file using AES-256-CBC with OpenSSL.
 
+## Tips
+- Use CyberOps Workstation and run the full commands exactly as shown.
+
 ## Lab Environment
 - CyberOps Workstation VM
 - Input file: /home/analyst/lab.support.files/letter_to_grandma.txt

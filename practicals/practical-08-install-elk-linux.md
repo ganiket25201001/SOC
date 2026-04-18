@@ -3,6 +3,9 @@
 ## Aim
 Install Java and Elasticsearch, then verify Elasticsearch service.
 
+## Tips
+- Use Ubuntu and follow commands only.
+
 ## Part 1: Install Java
 
 1. Update package index.
@@ -14,7 +17,7 @@ sudo apt update
 2. Install Java runtime and prerequisites.
 
 ```bash
-sudo apt install -y default-jre curl gnupg apt-transport-https
+sudo apt install -y default-jre
 ```
 
 3. Verify Java version.
