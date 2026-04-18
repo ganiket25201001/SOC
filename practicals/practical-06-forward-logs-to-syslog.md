@@ -3,6 +3,10 @@
 ## Aim
 Configure your Linux system to send syslog messages to a syslog server and read them.
 
+## Prerequisites
+- Practical 5 (rsyslog server setup) is completed.
+- Syslog server IP address is available (example: 192.168.137.50).
+
 ## Steps
 
 1. Install and configure rsyslog server first. For this, refer Practical 5.
@@ -60,3 +64,8 @@ In this example, `kali` is the client machine name.
 ```bash
 sudo tail -f /var/log/kali/rsyslogd.log
 ```
+
+## Expected Result
+- Syslog messages from the client are forwarded to the rsyslog server.
+- A client hostname directory (for example, `kali`) appears under `/var/log/` on the server.
+- Logs such as `rsyslogd.log` can be read from that client directory.
