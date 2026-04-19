@@ -17,7 +17,13 @@ GRAYLOG_REPO_DEB="/tmp/graylog-repo.deb"
 GRAYLOG_CONF="/etc/graylog/server/server.conf"
 ES_YML="/etc/elasticsearch/elasticsearch.yml"
 GRAYLOG_HTTP_BIND_ADDRESS="${GRAYLOG_HTTP_BIND_ADDRESS:-0.0.0.0:9000}"
-GRAYLOG_HTTP_EXTERNAL_URI="${GRAYLOG_HTTP_EXTERNAL_URI:-http://127.0.0.1:9000/}"
+
+default_graylog_host_ip="$(hostname -I 2>/dev/null | awk '{for (i=1; i<=NF; i++) if ($i !~ /^127\./) {print $i; exit}}')"
+if [[ -z "$default_graylog_host_ip" ]]; then
+  default_graylog_host_ip="127.0.0.1"
+fi
+
+GRAYLOG_HTTP_EXTERNAL_URI="${GRAYLOG_HTTP_EXTERNAL_URI:-http://${default_graylog_host_ip}:9000/}"
 TAIL_LOGS="${TAIL_LOGS:-false}"
 
 echo "Installing prerequisites..."

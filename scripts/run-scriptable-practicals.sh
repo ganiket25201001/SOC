@@ -51,7 +51,12 @@ while [[ $# -gt 0 ]]; do
       ;;
     -n|--number)
       shift
-      NUMBER="${1:-}"
+      if [[ $# -eq 0 ]]; then
+        echo "Missing value for --number" >&2
+        print_usage
+        exit 1
+      fi
+      NUMBER="$1"
       MODE="number"
       ;;
     -a|--all)

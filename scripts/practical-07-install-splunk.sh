@@ -23,7 +23,10 @@ echo "Downloading Splunk package..."
 wget -O "$SPLUNK_DEB_PATH" "$SPLUNK_DEB_URL"
 
 echo "Installing Splunk..."
-dpkg -i "$SPLUNK_DEB_PATH" || apt-get install -f -y
+if ! dpkg -i "$SPLUNK_DEB_PATH"; then
+  apt-get install -f -y
+  dpkg -i "$SPLUNK_DEB_PATH"
+fi
 
 if [[ ! -x "/opt/splunk/bin/splunk" ]]; then
   echo "Error: Splunk binary not found at /opt/splunk/bin/splunk"
