@@ -2,6 +2,11 @@
 
 This guide maps all practicals into separate Markdown files and gives you one script to view one practical or all practicals.
 
+This repository currently contains two practical sets:
+
+1. `practicals/` (SOC practical set with 10 practicals)
+2. `CF_Practical/` (CF practical set generated from `CF,txt`)
+
 ## Practical Index
 
 1. [Practical 1 - Encrypting and Decrypting Data Using OpenSSL](practicals/practical-01-openssl.md)
@@ -15,15 +20,31 @@ This guide maps all practicals into separate Markdown files and gives you one sc
 9. [Practical 9 - Install and Configure Graylog on Linux](practicals/practical-09-install-graylog-linux.md)
 10. [Practical 10 - Demonstrate Conversion of Data into a Universal Format](practicals/practical-10-convert-data-universal-format.md)
 
+## CF Practical Index
+
+Source file: `CF,txt`
+
+1. [Practical 1 - Creating a Forensic Image](CF_Practical/practical-01.md)
+2. [Practical 2 - Data Carving and Recovery](CF_Practical/practical-02.md)
+3. [Practical 3 - File System Analysis using TSK](CF_Practical/practical-03.md)
+4. [Practical 4 - Registry Data Extraction and Analysis](CF_Practical/practical-04.md)
+5. [Practical 5 - Network Forensics and Packet Analysis](CF_Practical/practical-05.md)
+6. [Practical 6 - Volatile Memory Analysis](CF_Practical/practical-06.md)
+7. [Practical 7 - Email Forensics](CF_Practical/practical-07.md)
+8. [Practical 8 - Internet Artifact Analysis](CF_Practical/practical-08.md)
+9. [Practical 9 - Deleted/Corrupted File Recovery](CF_Practical/practical-09.md)
+
 ## How to Use These Files
 
 1. Open this file first.
 2. Pick the practical number you want.
-3. Open the related Markdown file from practicals folder.
+3. Open the related Markdown file from `practicals/` or `CF_Practical/`.
 4. Follow commands in order.
 5. Verify expected result at the end of each file.
 
 ## Run Helper Script
+
+These helper scripts target files in `practicals/`.
 
 PowerShell script available: run-practical.ps1
 Linux shell script available: run-practical.sh

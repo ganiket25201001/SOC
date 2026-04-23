@@ -1,0 +1,355 @@
+*Practical 1: Creating a Forensic Image using tools like FTK Imager, Guymager, dd (command-line tool).*
+Aim: To create a mathematically verifiable bit-stream copy of a digital device.
+Prerequisites: 8GB USB Drive, FTK Imager (Windows), Guymager/dd (Kali).
+Implementation 1: Windows Environment
+Tool Used: AccessData FTK Imager
+Step-by-Step Procedure:
+Connect Evidence: Plug the suspect USB into the write-blocker, then connect the blocker to your workstation.
+Launch FTK Imager: Right-click -> Run as Administrator.
+Initiate Capture: Go to File -> Create Disk Image.
+Select Source: Choose Physical Drive.
+Never choose 'Logical Drive' unless you have a specific legal reason; you’ll miss the Master Boot Record (MBR) and unallocated space.
+Select Device: Pick your USB drive (e.g., \\.\PhysicalDrive1). Click Finish.
+Add Destination: Click Add... in the next window.
+Choose Image Type: Select E01 (EnCase).
+Why? E01 allows for compression and embeds case metadata (Examiner name, Case ID) directly into the file.
+Evidence Details: Enter Case Number (e.g., MU/CYBER/2026/01), Evidence Number, and Notes.
+Image Destination: * Select your sterilized drive folder.
+Name the file (e.g., Suspect_USB_Image).
+Verification: Ensure the box "Verify images after they are created" is checked. Click Start.
+Result: Once finished, a "Hash Verification" box appears. Record the MD5 and SHA1 hashes for your report.
+Implementation 2: Kali Linux Environment
+Tools Used: dcfldd (Command Line) and Guymager (GUI)
+Method A: The GUI Approach (Guymager)
+Launch: Open Terminal and type sudo guymager.
+Identify: Find your USB drive in the list (usually /dev/sdb or /dev/sdc).
+Acquire: Right-click the drive -> Acquire Image.
+Config: * Format: Expert Witness Compression, format .E01.
+Metadata: Fill in Case ID and Examiner details.
+Hashing: Check Calculate MD5 and Calculate SHA-256.
+Start: Click OK. Guymager will turn the bar green once verified.
+Method B: The Hardcore Approach (dcfldd)
+Field Reality: When a GUI fails on a corrupted drive, we use dcfldd (the forensic version of dd from the DoD).
+Identify: lsblk to find your device path.
+Execute Command: sudo dcfldd if=/dev/sdb of=/home/kali/Desktop/evidence.dd hash=sha256 hashlog=hash_report.txt
+if: Input File (Suspect Drive).
+of: Output File (Forensic Image).
+hash: Calculates the hash while it copies.
+
+*Practical 2: Use data carving tools like FTK Imager, Autopsy, Scalpel, etc. to recover deleted or hidden data from a digital device. Use minimum three tools.*
+Aim: To recover files based on file signatures (headers/footers) from unallocated space.
+Prerequisites: Forensic Image from Prac 1, Autopsy (Windows), Scalpel (Kali).
+Implementation 1: Windows Environment
+Tool A: Autopsy (The Heavy Lifter)
+Case Setup: Open Autopsy. Create a New Case. Name it PRAC_02_CARVING.
+Add Data Source: Select Disk Image. Point to your .E01 or .dd file from Practical 1.
+Configure Ingest Modules: This is the most important step.
+Ensure File Recovery and PhotoRec Carver are checked.
+Autopsy uses the PhotoRec engine under the hood for carving. It’s powerful but slow.
+Analysis: Once ingest is complete, look at the Views tab in the left sidebar.
+Extraction: Navigate to File Types -> Deleted Files. Autopsy will show files it successfully "carved" from unallocated space.
+Verify: Right-click a recovered image, select View in Hex to ensure the header matches the file type.
+Tool B: FTK Imager (Quick Extraction)
+Add Evidence: Click File -> Add Evidence Item. Select Image File.
+Browse Unallocated: In the Evidence Tree, look for folders with a red 'X' (deleted) or the entry for [unallocated space].
+Export: Right-click the deleted file/unallocated block and select Export Files....
+Reality Check: FTK Imager is better at recovering files that are still indexed in the MFT but marked deleted. For deep carving of overwritten metadata, Autopsy/PhotoRec is superior.
+Implementation 2: Kali Linux Environment
+Tool C: Scalpel (High-Speed CLI Carver)
+Configuration: Scalpel doesn't just run; you have to tell it what to look for.
+sudo nano /etc/scalpel/scalpel.conf
+Scroll down and uncomment (remove the #) the lines for the file types you want to recover (e.g., jpg, png, pdf, doc). Save and exit (Ctrl+O, Enter, Ctrl+X).
+Execution: Run the carving command.
+sudo scalpel -o /home/kali/Desktop/recovered_data/ /home/kali/Desktop/evidence.dd
+-o: Output directory (must be empty or new).
+evidence.dd: Your source image.
+Audit: Scalpel will generate an audit.txt in the output folder. This is your forensic log. It tells you exactly where (offset) in the image the file was found.
+
+
+*Practical 3: File System Analysis using the Sleuth Kit (TSK)*
+Aim: To analyze file system metadata, inodes, and directory structures.
+Prerequisites: Kali Linux, TSK installed.
+Implementation 1: Windows Environment
+Tool Used: Autopsy & FTK Imager
+Step-by-Step Procedure:
+Load Image: Open Autopsy, create a new case, and add your forensic image as the data source.
+Navigate File System: In the left-hand directory tree, expand the drive. Autopsy uses TSK under the hood to map out the folder structure, even for deleted items (marked with a red 'X').
+Analyze Metadata: Select any file. In the bottom pane, click the Metadata tab.
+Record the MFT Entry/Inode number.
+Observe the Standard Information vs. File Name attributes (specific to NTFS).
+Timeline Analysis: Use the "Timeline" tool in Autopsy to see when the file system was most active.
+Cross-Verify with FTK Imager: Open the same image in FTK Imager. Click on a file and look at the Properties pane (bottom left). Compare the "MTIMES" with what Autopsy showed. If they differ, you have a time zone offset issue—a common mistake that ruins cases.
+Implementation 2: Kali Linux Environment
+Tool Used: The Sleuth Kit (TSK) CLI
+This is where the real experts work. No GUI, just raw data analysis.
+Step-by-Step Procedure:
+Analyze Partition Table: Find the starting offset of the partition you want to analyze.
+mmls evidence.dd
+Look for the "Start" sector of the primary data partition (e.g., 2048).
+Check File System Stats: Use fsstat with the offset to see block size and volume serial numbers.
+fsstat -o 2048 evidence.dd
+List Files & Directories: Use fls to see the contents of the root directory.
+fls -o 2048 -r evidence.dd
+-r: Recursive.
+Look for entries starting with r/r (active) or d/d (deleted). Note the Inode number at the start of the line.
+Deep Metadata Inspection: Use istat to see everything about a specific file using its Inode number.
+istat -o 2048 evidence.dd [Inode_Number]
+Observe the MACB times: Modified, Accessed, Changed (Metadata), and Birth (Created).
+Extract Specific File: If you find a suspicious file, pull it out directly using its Inode.
+icat -o 2048 evidence.dd [Inode_Number] > recovered_suspicious_file.txt
+
+
+*Practical 4: Extract and analysis registry data using tools like FTK Imager, Autopsy, Registry Explorer, etc. Use minimum three tools.*
+Aim: To extract user activity, typed URLs, and recently accessed files from registry hives.
+Prerequisites: Registry Explorer (EZTools), Autopsy.
+Implementation 1: Windows Environment
+Tools Used: FTK Imager (Extraction) & Registry Explorer (Analysis)
+Step-by-Step Procedure:
+Extraction via FTK Imager:
+Open your forensic image in FTK Imager.
+Navigate to [Partition]\Windows\System32\config.
+Right-click the SYSTEM and SOFTWARE files and select Export Files....
+Navigate to the user profile: [Partition]\Users\[Username]\.
+Export NTUSER.DAT.
+Analysis via Registry Explorer:
+Launch RegistryExplorer.exe.
+Go to File -> Load Hive. Select your exported NTUSER.DAT.
+User Activity: Navigate to Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist. Look for the {CEBFF5CD...} keys. These show a list of programs executed, their run counts, and the last execution time (usually ROT13 encoded, but Registry Explorer decodes it for you).
+Automated Analysis via Autopsy:
+In your Autopsy case, run the Recent Activity ingest module.
+Once done, expand the "Data Artifacts" section in the left pane. Click on "Operating System User Account" and "Program Run" to see the Registry data correlated into a readable table.
+Implementation 2: Kali Linux Environment
+Tool Used: RegRipper (rip.pl)
+RegRipper is the king of CLI registry analysis. It uses "plugins" to extract specific data so you don't have to manually hunt through keys.
+Step-by-Step Procedure:
+Locate Hives: Ensure your forensic image is mounted or you have the exported hives in your Kali directory.
+Run RegRipper:
+# To see all available plugins for a User hive:
+rip.pl -h
+# To run a full report on the NTUSER.DAT hive:
+rip.pl -r /path/to/NTUSER.DAT -p ntuser > ntuser_report.txt
+Analyze Output: Open ntuser_report.txt.
+Search for TypedURLs: This shows what the user manually typed into the Windows Explorer bar.
+Search for WinRAR: If the suspect compressed files before stealing them (exfiltration), the MRU (Most Recently Used) list will be here.
+
+*Practical 5: Perform network forensics using tools like Wireshark, NetworkMiner, tcpdump, etc. Use minimum three tools.*
+Aim: To capture and analyze traffic for suspicious patterns or unencrypted credentials.
+Prerequisites: Wireshark, NetworkMiner (Windows), tcpdump (Kali).
+Implementation 1: Windows Environment
+Tool A: Wireshark (The Microscope)
+Capture: Open Wireshark. Select your active Network Interface (e.g., Wi-Fi or Ethernet). Click the blue shark fin to start capturing.
+Filter: Use the filter bar to isolate specific traffic.
+http: Shows only web traffic.
+ip.addr == [Suspect_IP]: Shows all traffic to/from a specific machine.
+dns: Shows all website lookups (good for finding C2 - Command and Control servers).
+Follow Stream: Right-click a TCP packet -> Follow -> TCP Stream. This reconstructs the "conversation" in a readable format.
+Export Objects: Go to File -> Export Objects -> HTTP. You can literally "re-download" files the suspect downloaded during the capture.
+Tool B: NetworkMiner (The Automated Investigator)
+Load: Open NetworkMiner. Go to File -> Open and select your saved .pcap file.
+Artifact Discovery: Unlike Wireshark, NetworkMiner is "artifact-centric."
+Files Tab: Automatically lists every file transferred over the network (images, EXEs, docs).
+Images Tab: Shows a gallery of images viewed by the user.
+Credentials Tab: Automatically extracts usernames and passwords from unencrypted logins.
+Observation: Use this to quickly see what was taken, while Wireshark tells you how.
+Listen carefully. In the world of elite incident response, disk forensics tells you what happened, but Network Forensics tells you what is happening or how the intruder got in. It is the only way to catch an adversary in motion.
+
+When I was at the "Top 5" firms, we called network traffic the "ultimate truth." A suspect can delete logs and wipe drives, but they cannot hide the packets they sent across the wire—provided you were capturing them. Under Section 63 of the Bharatiya Sakshya Adhiniyam (BSA) 2023, a network packet capture (PCAP) is a potent piece of electronic evidence, but only if you can prove its source and that it hasn't been filtered or tampered with during collection.
+
+In this practical, we are moving from the "dead" forensics of hard drives to the "live" forensics of the wire.
+
+Practical 5: Network Forensics and Packet Analysis
+Aim: To capture, analyze, and reconstruct network traffic to identify suspicious patterns, unauthorized data exfiltration, or cleartext credential leakage.
+
+Prerequisites:
+
+Environment: A local area network (LAN) or a controlled lab environment.
+
+Windows Tools: Wireshark, NetworkMiner (Free Edition).
+
+Kali Linux Tools: tcpdump.
+
+Sample Data: A .pcap file containing various protocols (HTTP, DNS, FTP, etc.).
+
+Theoretical Background:
+Network forensics involves the monitoring and analysis of computer network traffic. We rely on the OSI Model to understand where the data lives.
+
+Packet Capture (PCAP): The standard format for recorded network traffic.
+
+Protocols: We look for "insecure" protocols like HTTP, FTP, Telnet, and SMTP which transmit data in cleartext.
+
+Flow Analysis: Identifying who talked to whom, for how long, and how much data was moved (crucial for detecting data exfiltration).
+
+
+YouTube Guide: Network Forensics with Wireshark and NetworkMiner
+
+Implementation 1: Windows Environment
+Tool A: Wireshark (The Microscope)
+Capture: Open Wireshark. Select your active Network Interface (e.g., Wi-Fi or Ethernet). Click the blue shark fin to start capturing.
+
+Filter: Use the filter bar to isolate specific traffic.
+
+http: Shows only web traffic.
+
+ip.addr == [Suspect_IP]: Shows all traffic to/from a specific machine.
+
+dns: Shows all website lookups (good for finding C2 - Command and Control servers).
+
+Follow Stream: Right-click a TCP packet -> Follow -> TCP Stream. This reconstructs the "conversation" in a readable format.
+
+Export Objects: Go to File -> Export Objects -> HTTP. You can literally "re-download" files the suspect downloaded during the capture.
+
+Tool B: NetworkMiner (The Automated Investigator)
+Load: Open NetworkMiner. Go to File -> Open and select your saved .pcap file.
+
+Artifact Discovery: Unlike Wireshark, NetworkMiner is "artifact-centric."
+
+Files Tab: Automatically lists every file transferred over the network (images, EXEs, docs).
+
+Images Tab: Shows a gallery of images viewed by the user.
+
+Credentials Tab: Automatically extracts usernames and passwords from unencrypted logins.
+
+Observation: Use this to quickly see what was taken, while Wireshark tells you how.
+Implementation 2: Kali Linux Environment
+Tool C: tcpdump (The High-Speed Recorder)
+In a high-traffic data center, a GUI tool like Wireshark will crash your system. Elite investigators use tcpdump for the heavy lifting.
+Live Capture: ```bash
+sudo tcpdump -i eth0 -w internal_investigation.pcap
+* `-i`: Interface.
+* `-w`: Write to file.
+Filtered Capture (Targeted): ```bash
+sudo tcpdump -i eth0 port 80 or port 443 -v
+This captures only web traffic with "verbose" output.
+Read and Filter: ```bash
+tcpdump -r internal_investigation.pcap 'tcp port 80 and src 192.168.1.5'
+This reads the file and shows only traffic from a specific suspect's IP on port 80.
+
+*Practical 6: Study volatile memory from a computer to identify running processes, loaded drivers, and other
+information using tools like Volatility Framework, FTK Imager, redline, etc. Use minimum three tools.*
+Aim: To analyze RAM for running processes, malware, and unsaved documents.
+Prerequisites: Volatility 3 (Kali), FTK Imager (Memory Capture).
+Implementation 1: Windows Environment
+Phase A: Acquisition (FTK Imager)
+Launch: Run FTK Imager as Administrator.
+Capture: Click File -> Capture Memory....
+Config: * Destination: Select your external drive.
+Filename: memdump.mem.
+Check "Include pagefile": This captures the pagefile.sys (data swapped to disk), which often contains older memory fragments.
+Check "Create AD1 file": This creates a custom AccessData evidence container.
+Execute: Click Capture Memory. Do not touch the computer while this is running to avoid "smearing" the memory.
+Phase B: Analysis (Mandiant Redline)
+Open: Launch Redline. Select "Analyze Data" -> "From a Saved Memory Dump".
+Load: Point to your memdump.mem.
+Triage: Use the "Analysis Session" to look at:
+Processes: Look for odd names (e.g., svch0st.exe instead of svchost.exe).
+Hierarchical View: See which process spawned which. A cmd.exe spawned by notepad.exe is a massive red flag.
+Drivers: Check for unsigned drivers that could be rootkits.
+Implementation 2: Kali Linux Environment
+Tool Used: Volatility 3
+Volatility 3 is the engine that runs elite DFIR labs. It is Python-based and requires no "profile" setup, unlike the older version 2.
+Step-by-Step Procedure:
+Installation/Setup: Ensure you have the symbols for the OS you are analyzing.
+Process Listing (pslist):
+python3 vol.py -f /path/to/memdump.mem windows.pslist
+This shows a high-level list of processes. Note the PID (Process ID) and PPID (Parent PID).
+Hidden Process Detection (psscan):
+python3 vol.py -f /path/to/memdump.mem windows.psscan
+Malware often unlinks itself from the process list. psscan finds these "ghost" processes by scanning for memory pool tags.
+Network Connections (netscan):
+python3 vol.py -f /path/to/memdump.mem windows.netscan
+This shows which process was talking to which external IP. Essential for finding C2 (Command & Control) callbacks.
+Command History (cmdline):
+python3 vol.py -f /path/to/memdump.mem windows.cmdline
+Shows exactly what was typed into the command prompt. This is often where we find the attacker's "footprints."
+
+
+*Practical 7: Examine email files to identify senders, recipients, attachments, and other information using tools like FTK Imager, EnCase Forensic Toolkit, MailX
+(command-line tool), etc. Use minimum three tools*
+Aim: To analyze email headers (IP addresses, X-headers) and attachments.
+Prerequisites: Autopsy (Windows), mailx or specialized MBOX viewer.
+Implementation 1: Windows Environment
+Tool A: FTK Imager (Quick Triage)
+Load: Click File -> Add Evidence Item -> Contents of a Folder. Point it to your email files.
+View Raw: Select an .eml or .msg file. In the viewer pane, switch to the "Text" or "Hex" tab.
+Identify Headers: Look for the blocks starting with Delivered-To:, Received:, and Return-Path:. Copy these out for analysis.
+Tool B: Autopsy (Automated Extraction)
+Add Data: Create a case and add your .pst or .mbox file as a data source.
+Ingest: Run the Email Parser module.
+Analyze: * Navigate to the "Email Messages" node in the Results tree.
+Autopsy will automatically categorize senders, recipients, and timestamps.
+Click the "Attachments" tab to see every file sent with the emails. Right-click to extract and hash them.
+Implementation 2: Kali Linux Environment
+Tool Used: mailx and Command-Line Utilities
+When dealing with massive .mbox files (like a Google Takeout export), GUIs will freeze. You need the power of the terminal.
+Step-by-Step Procedure:
+Read Raw Mail: Use mailx to open a mailbox file.
+mail -f suspect_mailbox.mbox
+Filter Headers with Grep: To find the originating IP addresses in a large file:
+grep "Received: from" suspect_mailbox.mbox | awk '{print $4}' | sort | uniq -c
+This command identifies every server name mentioned in the "Received" headers and counts how many times they appear.
+Extract Attachments (using munpack):
+sudo apt install mpack
+munpack suspect_email.eml
+This will strip the MIME encoding and save the actual attachment (e.g., invoice.pdf.exe) to your current directory.
+
+
+
+*Practical 8: Study internet artifact analysis to examine web browsing history, chat logs, and other internet artifacts to identify user activity using Browser History Examiner and ChromeCacheViewer*
+Aim: To reconstruct browsing history and cache.
+Prerequisites: Browser History Examiner, ChromeCacheViewer.
+Implementation 1: Windows Environment
+Tool A: Browser History Examiner
+Launch: Run the tool. If you are analyzing the forensic image, point it to the drive letter where the image is mounted
+Select Artifacts: Choose Chrome, Firefox, or Edge.
+Analyze: The tool will parse the SQLite databases and present a unified timeline. Look for "Search Terms"—this tells you exactly what the user was looking for on Google or Bing.
+Report: Export the filtered results to a CSV or PDF.
+Tool B: ChromeCacheViewer (NirSoft)
+Locate Cache: Go to File -> Select Cache Folder.
+Point to Evidence: Navigate to the extracted folder: [User_Profile]\AppData\Local\Google\Chrome\User Data\Default\Cache.
+Reconstruct: The tool lists all cached items. Sort by "Last Accessed."
+View: Double-click an entry to see the URL. If it’s an image, use the "Open Cache Subfolder" to see the actual file the user saw on their screen.
+Implementation 2: Kali Linux Environment
+Tool Used: sqlite3 (The professional way)
+Professor's Note: Tools like Browser History Examiner are just GUIs for SQL queries. A real investigator knows how to talk to the database directly.
+Step-by-Step Procedure:
+Locate the Database: Navigate to the extracted browser folder in your terminal.
+Access History: ```bash
+sqlite3 History
+Query the Data: Run a SQL command to see URLs and Visit Times:
+SELECT url, title, visit_count, last_visit_time FROM urls ORDER BY last_visit_time DESC;
+Note: Chrome timestamps are in "WebKit format" (microseconds since Jan 1, 1601). You’ll need to convert these to human-readable time.
+Extract Strings from Cache: If the cache is corrupted or in a proprietary format:
+strings Chrome_Cache_File | grep -i "http" | less
+This pulls every URL string out of the raw cache data.
+
+
+
+*Practical 9: Using tools like Test Disk, Recuva, PhotoRec, etc. recover the deleted or corrupted files from storage media. Use minimum three tools.*
+Aim: To recover corrupted or deleted files using signature and partition analysis.
+Prerequisites: TestDisk, Recuva, PhotoRec.
+Implementation 1: Windows Environment (PhotoRec Win)
+Tool Used: PhotoRec (CLI-GUI hybrid)
+Step-by-Step Procedure:
+Launch: Extract the TestDisk folder and run photorec_win.exe as Administrator.
+Select Drive: Highlight the target USB/Disk from the list and press Enter.
+Partition Selection: Choose the partition to scan. If the drive is corrupted, choose [Whole disk].
+File System Type: Choose [Other] (for FAT/NTFS/ext4) unless it's an old Mac/Unix system.
+Scan Range: Select [Free] to scan only unallocated space (for deleted files) or [Whole] if the drive is corrupted.
+File Selection (Optional): Press s to disable all file types, then select only what you need (e.g., jpg, pdf, doc) to speed up the process.
+Destination: Use the arrow keys to navigate to a folder on your C: drive or an external drive. Press C to start the recovery.
+Implementation 2: Kali Linux Environment
+Tool Used: photorec (Command Line)
+Step-by-Step Procedure:
+Identify Target: Run sudo fdisk -l to find your device path (e.g., /dev/sdb).
+Launch: Type sudo photorec /dev/sdb.
+Configuration: The interface is identical to the Windows version. Follow the same logic:
+Select partition.
+Select File System type.
+Choose the destination directory (ensure you have write permissions).
+Observation: Watch the terminal as PhotoRec lists the files it finds in real-time.
+Implementation 1: Kali Linux (TestDisk)
+Analyze: sudo testdisk /dev/sdb. Select Partition Table Type.
+Undelete: Navigate to [ Advanced ] > [ Undelete ]. Select files (in red) and press 'C' to copy.
+Implementation 2: Windows (Recuva)
+Scan: Run "Deep Scan" on the drive.
+Interpret: Note the "Green/Orange/Red" status. Red means the clusters were overwritten recovery is impossible.
