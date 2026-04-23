@@ -1,33 +1,49 @@
-﻿# Practical 7: Examine email files to identify senders, recipients, attachments, and other information using tools like FTK Imager, EnCase Forensic Toolkit, MailX (command-line tool), etc. Use minimum three tools
+﻿# Practical 7 Cheatsheet: Email Forensics
 
-## Content
+## Objective
+Identify sender/recipient metadata, message routing, and attachments from email evidence.
 
-Aim: To analyze email headers (IP addresses, X-headers) and attachments.
-Prerequisites: Autopsy (Windows), mailx or specialized MBOX viewer.
-Implementation 1: Windows Environment
-Tool A: FTK Imager (Quick Triage)
-Load: Click File -> Add Evidence Item -> Contents of a Folder. Point it to your email files.
-View Raw: Select an .eml or .msg file. In the viewer pane, switch to the "Text" or "Hex" tab.
-Identify Headers: Look for the blocks starting with Delivered-To:, Received:, and Return-Path:. Copy these out for analysis.
-Tool B: Autopsy (Automated Extraction)
-Add Data: Create a case and add your .pst or .mbox file as a data source.
-Ingest: Run the Email Parser module.
-Analyze: * Navigate to the "Email Messages" node in the Results tree.
-Autopsy will automatically categorize senders, recipients, and timestamps.
-Click the "Attachments" tab to see every file sent with the emails. Right-click to extract and hash them.
-Implementation 2: Kali Linux Environment
-Tool Used: mailx and Command-Line Utilities
-When dealing with massive .mbox files (like a Google Takeout export), GUIs will freeze. You need the power of the terminal.
-Step-by-Step Procedure:
-Read Raw Mail: Use mailx to open a mailbox file.
+## Tools
+- Windows: FTK Imager, Autopsy
+- Kali: mailx, grep/awk, munpack
+- Input: .eml, .msg, .pst, or .mbox files
+
+## Windows Steps (FTK Imager)
+1. Add email folder as evidence item.
+2. Open .eml/.msg in Text or Hex view.
+3. Extract header lines such as:
+   - Delivered-To
+   - Received
+   - Return-Path
+4. Preserve raw header text for reporting.
+
+## Windows Steps (Autopsy)
+1. Create case and add .pst/.mbox source.
+2. Run Email Parser ingest module.
+3. Review sender, recipient, timestamp, and subject metadata.
+4. Export attachments and hash them.
+
+## Kali Steps
+1. Open mailbox interactively:
+```bash
 mail -f suspect_mailbox.mbox
-Filter Headers with Grep: To find the originating IP addresses in a large file:
+```
+2. Extract routing hosts from Received headers:
+```bash
 grep "Received: from" suspect_mailbox.mbox | awk '{print $4}' | sort | uniq -c
-This command identifies every server name mentioned in the "Received" headers and counts how many times they appear.
-Extract Attachments (using munpack):
+```
+3. Install munpack and extract MIME attachments:
+```bash
 sudo apt install mpack
 munpack suspect_email.eml
-This will strip the MIME encoding and save the actual attachment (e.g., invoice.pdf.exe) to your current directory.
+```
 
+## Report Checklist
+1. Sender and recipient identities
+2. Full Received chain
+3. Attachment names and hashes
+4. Suspicious domains or relay hosts
 
-
+## Critical Notes
+- Preserve original raw message files.
+- Large mbox files are often easier to parse via CLI.

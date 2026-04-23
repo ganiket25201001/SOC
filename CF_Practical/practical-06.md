@@ -1,41 +1,51 @@
-﻿# Practical 6: Study volatile memory from a computer to identify running processes, loaded drivers, and other information using tools like Volatility Framework, FTK Imager, redline, etc. Use minimum three tools.
+﻿# Practical 6 Cheatsheet: Volatile Memory Analysis
 
-## Content
+## Objective
+Analyze RAM to identify suspicious processes, drivers, network activity, and command history.
 
-Aim: To analyze RAM for running processes, malware, and unsaved documents.
-Prerequisites: Volatility 3 (Kali), FTK Imager (Memory Capture).
-Implementation 1: Windows Environment
-Phase A: Acquisition (FTK Imager)
-Launch: Run FTK Imager as Administrator.
-Capture: Click File -> Capture Memory....
-Config: * Destination: Select your external drive.
-Filename: memdump.mem.
-Check "Include pagefile": This captures the pagefile.sys (data swapped to disk), which often contains older memory fragments.
-Check "Create AD1 file": This creates a custom AccessData evidence container.
-Execute: Click Capture Memory. Do not touch the computer while this is running to avoid "smearing" the memory.
-Phase B: Analysis (Mandiant Redline)
-Open: Launch Redline. Select "Analyze Data" -> "From a Saved Memory Dump".
-Load: Point to your memdump.mem.
-Triage: Use the "Analysis Session" to look at:
-Processes: Look for odd names (e.g., svch0st.exe instead of svchost.exe).
-Hierarchical View: See which process spawned which. A cmd.exe spawned by notepad.exe is a massive red flag.
-Drivers: Check for unsigned drivers that could be rootkits.
-Implementation 2: Kali Linux Environment
-Tool Used: Volatility 3
-Volatility 3 is the engine that runs elite DFIR labs. It is Python-based and requires no "profile" setup, unlike the older version 2.
-Step-by-Step Procedure:
-Installation/Setup: Ensure you have the symbols for the OS you are analyzing.
-Process Listing (pslist):
+## Tools
+- Windows: FTK Imager (capture), Mandiant Redline (analysis)
+- Kali: Volatility 3
+
+## Windows Steps (Memory Capture)
+1. Run FTK Imager as Administrator.
+2. Go to File > Capture Memory.
+3. Set destination and filename (example: memdump.mem).
+4. Enable Include pagefile.
+5. Optionally enable Create AD1 file.
+6. Start capture and avoid interacting with the host during acquisition.
+
+## Windows Steps (Redline Triage)
+1. Open Redline and choose Analyze Data > From a Saved Memory Dump.
+2. Load memdump.mem.
+3. Review process list and process tree.
+4. Flag suspicious names (for example: svch0st.exe).
+5. Review unsigned or suspicious drivers.
+
+## Kali Steps (Volatility 3)
+1. List processes:
+```bash
 python3 vol.py -f /path/to/memdump.mem windows.pslist
-This shows a high-level list of processes. Note the PID (Process ID) and PPID (Parent PID).
-Hidden Process Detection (psscan):
+```
+2. Scan for hidden processes:
+```bash
 python3 vol.py -f /path/to/memdump.mem windows.psscan
-Malware often unlinks itself from the process list. psscan finds these "ghost" processes by scanning for memory pool tags.
-Network Connections (netscan):
+```
+3. Check network connections:
+```bash
 python3 vol.py -f /path/to/memdump.mem windows.netscan
-This shows which process was talking to which external IP. Essential for finding C2 (Command & Control) callbacks.
-Command History (cmdline):
+```
+4. Recover command-line history:
+```bash
 python3 vol.py -f /path/to/memdump.mem windows.cmdline
-Shows exactly what was typed into the command prompt. This is often where we find the attacker's "footprints."
+```
 
+## Report Checklist
+1. Memory image filename and size
+2. Suspicious PID/PPID relationships
+3. External IP connections
+4. Command execution traces
 
+## Critical Notes
+- Memory is volatile; capture early.
+- Correlate process findings with network and command artifacts.

@@ -1,36 +1,48 @@
-﻿# Practical 3: File System Analysis using the Sleuth Kit (TSK)
+﻿# Practical 3 Cheatsheet: File System Analysis (TSK)
 
-## Content
+## Objective
+Analyze file system structure, metadata, inodes, and timeline artifacts.
 
-Aim: To analyze file system metadata, inodes, and directory structures.
-Prerequisites: Kali Linux, TSK installed.
-Implementation 1: Windows Environment
-Tool Used: Autopsy & FTK Imager
-Step-by-Step Procedure:
-Load Image: Open Autopsy, create a new case, and add your forensic image as the data source.
-Navigate File System: In the left-hand directory tree, expand the drive. Autopsy uses TSK under the hood to map out the folder structure, even for deleted items (marked with a red 'X').
-Analyze Metadata: Select any file. In the bottom pane, click the Metadata tab.
-Record the MFT Entry/Inode number.
-Observe the Standard Information vs. File Name attributes (specific to NTFS).
-Timeline Analysis: Use the "Timeline" tool in Autopsy to see when the file system was most active.
-Cross-Verify with FTK Imager: Open the same image in FTK Imager. Click on a file and look at the Properties pane (bottom left). Compare the "MTIMES" with what Autopsy showed. If they differ, you have a time zone offset issue—a common mistake that ruins cases.
-Implementation 2: Kali Linux Environment
-Tool Used: The Sleuth Kit (TSK) CLI
-This is where the real experts work. No GUI, just raw data analysis.
-Step-by-Step Procedure:
-Analyze Partition Table: Find the starting offset of the partition you want to analyze.
+## Tools
+- Windows: Autopsy, FTK Imager
+- Kali: Sleuth Kit (mmls, fsstat, fls, istat, icat)
+
+## Windows Steps
+1. Create Autopsy case and add forensic image.
+2. Navigate directory tree and identify deleted items (red X).
+3. Open file Metadata tab and note MFT/Inode values.
+4. Review timeline activity for suspicious periods.
+5. Open same image in FTK Imager and compare file times.
+6. If timestamps differ, verify timezone handling before reporting.
+
+## Kali Steps (TSK CLI)
+1. Find partition start sector:
+```bash
 mmls evidence.dd
-Look for the "Start" sector of the primary data partition (e.g., 2048).
-Check File System Stats: Use fsstat with the offset to see block size and volume serial numbers.
+```
+2. Inspect filesystem details (replace 2048 with actual offset):
+```bash
 fsstat -o 2048 evidence.dd
-List Files & Directories: Use fls to see the contents of the root directory.
+```
+3. List files recursively:
+```bash
 fls -o 2048 -r evidence.dd
--r: Recursive.
-Look for entries starting with r/r (active) or d/d (deleted). Note the Inode number at the start of the line.
-Deep Metadata Inspection: Use istat to see everything about a specific file using its Inode number.
-istat -o 2048 evidence.dd [Inode_Number]
-Observe the MACB times: Modified, Accessed, Changed (Metadata), and Birth (Created).
-Extract Specific File: If you find a suspicious file, pull it out directly using its Inode.
-icat -o 2048 evidence.dd [Inode_Number] > recovered_suspicious_file.txt
+```
+4. Inspect inode metadata:
+```bash
+istat -o 2048 evidence.dd <inode_number>
+```
+5. Extract file by inode:
+```bash
+icat -o 2048 evidence.dd <inode_number> > recovered_file.bin
+```
 
+## Report Checklist
+1. Partition offset used
+2. Inode numbers examined
+3. MACB timestamps observed
+4. Extracted file names and hashes
 
+## Critical Notes
+- Wrong offset gives meaningless output.
+- Always document timezone assumptions for timeline evidence.

@@ -1,33 +1,44 @@
-﻿# Practical 2: Use data carving tools like FTK Imager, Autopsy, Scalpel, etc. to recover deleted or hidden data from a digital device. Use minimum three tools.
+﻿# Practical 2 Cheatsheet: Data Carving and Recovery
 
-## Content
+## Objective
+Recover deleted or hidden files from unallocated space using at least three tools.
 
-Aim: To recover files based on file signatures (headers/footers) from unallocated space.
-Prerequisites: Forensic Image from Prac 1, Autopsy (Windows), Scalpel (Kali).
-Implementation 1: Windows Environment
-Tool A: Autopsy (The Heavy Lifter)
-Case Setup: Open Autopsy. Create a New Case. Name it PRAC_02_CARVING.
-Add Data Source: Select Disk Image. Point to your .E01 or .dd file from Practical 1.
-Configure Ingest Modules: This is the most important step.
-Ensure File Recovery and PhotoRec Carver are checked.
-Autopsy uses the PhotoRec engine under the hood for carving. It’s powerful but slow.
-Analysis: Once ingest is complete, look at the Views tab in the left sidebar.
-Extraction: Navigate to File Types -> Deleted Files. Autopsy will show files it successfully "carved" from unallocated space.
-Verify: Right-click a recovered image, select View in Hex to ensure the header matches the file type.
-Tool B: FTK Imager (Quick Extraction)
-Add Evidence: Click File -> Add Evidence Item. Select Image File.
-Browse Unallocated: In the Evidence Tree, look for folders with a red 'X' (deleted) or the entry for [unallocated space].
-Export: Right-click the deleted file/unallocated block and select Export Files....
-Reality Check: FTK Imager is better at recovering files that are still indexed in the MFT but marked deleted. For deep carving of overwritten metadata, Autopsy/PhotoRec is superior.
-Implementation 2: Kali Linux Environment
-Tool C: Scalpel (High-Speed CLI Carver)
-Configuration: Scalpel doesn't just run; you have to tell it what to look for.
+## Tools
+- Windows: Autopsy, FTK Imager
+- Kali: Scalpel
+- Input: Forensic image from Practical 1 (.E01 or .dd)
+
+## Windows Steps (Autopsy)
+1. Create a new case (example: PRAC_02_CARVING).
+2. Add the forensic image as data source.
+3. Enable ingest modules: File Recovery and PhotoRec Carver.
+4. Run ingest and wait for completion.
+5. Open Views > File Types > Deleted Files.
+6. Validate recovered files with hex view (header/footer check).
+
+## Windows Steps (FTK Imager)
+1. Add evidence item (image file).
+2. Browse deleted entries (red X) and unallocated space.
+3. Export candidate files for analysis.
+
+## Kali Steps (Scalpel)
+1. Configure file signatures:
+```bash
 sudo nano /etc/scalpel/scalpel.conf
-Scroll down and uncomment (remove the #) the lines for the file types you want to recover (e.g., jpg, png, pdf, doc). Save and exit (Ctrl+O, Enter, Ctrl+X).
-Execution: Run the carving command.
+```
+2. Uncomment only required file types (jpg, png, pdf, doc, etc.).
+3. Run carving:
+```bash
 sudo scalpel -o /home/kali/Desktop/recovered_data/ /home/kali/Desktop/evidence.dd
--o: Output directory (must be empty or new).
-evidence.dd: Your source image.
-Audit: Scalpel will generate an audit.txt in the output folder. This is your forensic log. It tells you exactly where (offset) in the image the file was found.
+```
+4. Review recovered_data/audit.txt for offsets and extraction details.
 
+## Report Checklist
+1. Tool used per recovered file
+2. File path and type
+3. Carving offset from audit logs
+4. Validation notes (header/footer match)
 
+## Critical Notes
+- Keep output directory empty/new for Scalpel.
+- Autopsy is stronger for deep carving than FTK quick export.

@@ -1,36 +1,45 @@
-﻿# Practical 4: Extract and analysis registry data using tools like FTK Imager, Autopsy, Registry Explorer, etc. Use minimum three tools.
+﻿# Practical 4 Cheatsheet: Registry Extraction and Analysis
 
-## Content
+## Objective
+Extract and analyze registry hives for user activity, typed URLs, and executed programs.
 
-Aim: To extract user activity, typed URLs, and recently accessed files from registry hives.
-Prerequisites: Registry Explorer (EZTools), Autopsy.
-Implementation 1: Windows Environment
-Tools Used: FTK Imager (Extraction) & Registry Explorer (Analysis)
-Step-by-Step Procedure:
-Extraction via FTK Imager:
-Open your forensic image in FTK Imager.
-Navigate to [Partition]\Windows\System32\config.
-Right-click the SYSTEM and SOFTWARE files and select Export Files....
-Navigate to the user profile: [Partition]\Users\[Username]\.
-Export NTUSER.DAT.
-Analysis via Registry Explorer:
-Launch RegistryExplorer.exe.
-Go to File -> Load Hive. Select your exported NTUSER.DAT.
-User Activity: Navigate to Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist. Look for the {CEBFF5CD...} keys. These show a list of programs executed, their run counts, and the last execution time (usually ROT13 encoded, but Registry Explorer decodes it for you).
-Automated Analysis via Autopsy:
-In your Autopsy case, run the Recent Activity ingest module.
-Once done, expand the "Data Artifacts" section in the left pane. Click on "Operating System User Account" and "Program Run" to see the Registry data correlated into a readable table.
-Implementation 2: Kali Linux Environment
-Tool Used: RegRipper (rip.pl)
-RegRipper is the king of CLI registry analysis. It uses "plugins" to extract specific data so you don't have to manually hunt through keys.
-Step-by-Step Procedure:
-Locate Hives: Ensure your forensic image is mounted or you have the exported hives in your Kali directory.
-Run RegRipper:
-# To see all available plugins for a User hive:
+## Tools
+- Windows: FTK Imager, Registry Explorer, Autopsy
+- Kali: RegRipper (rip.pl)
+
+## Windows Steps (FTK + Registry Explorer)
+1. Open forensic image in FTK Imager.
+2. Export hives:
+   - [Partition]\\Windows\\System32\\config\\SYSTEM
+   - [Partition]\\Windows\\System32\\config\\SOFTWARE
+   - [Partition]\\Users\\<Username>\\NTUSER.DAT
+3. Open NTUSER.DAT in Registry Explorer.
+4. Navigate to UserAssist key:
+   - Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist
+5. Record program execution artifacts and run counts.
+
+## Windows Steps (Autopsy)
+1. Run Recent Activity ingest module.
+2. Review Data Artifacts such as Program Run and User Account entries.
+3. Export relevant artifact tables for report.
+
+## Kali Steps (RegRipper)
+1. List available plugins:
+```bash
 rip.pl -h
-# To run a full report on the NTUSER.DAT hive:
+```
+2. Run NTUSER report:
+```bash
 rip.pl -r /path/to/NTUSER.DAT -p ntuser > ntuser_report.txt
-Analyze Output: Open ntuser_report.txt.
-Search for TypedURLs: This shows what the user manually typed into the Windows Explorer bar.
-Search for WinRAR: If the suspect compressed files before stealing them (exfiltration), the MRU (Most Recently Used) list will be here.
+```
+3. Search report for TypedURLs, MRU lists, and execution traces.
 
+## Report Checklist
+1. Hive source paths
+2. Key paths examined
+3. Program execution artifacts
+4. Typed URL and MRU findings
+
+## Critical Notes
+- Work on exported hive copies, not originals.
+- Keep chain-of-custody details for each exported hive.
