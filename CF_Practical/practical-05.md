@@ -3,6 +3,9 @@
 ## Objective
 Capture and analyze network traffic to detect suspicious behavior, data exfiltration, and cleartext credentials.
 
+## Aim (From CF.txt)
+To capture and analyze traffic for suspicious patterns or unencrypted credentials.
+
 ## Tools
 - Windows: Wireshark, NetworkMiner
 - Kali: tcpdump

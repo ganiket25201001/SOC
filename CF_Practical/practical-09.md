@@ -3,6 +3,9 @@
 ## Objective
 Recover deleted or damaged files using signature carving and partition analysis.
 
+## Aim (From CF.txt)
+To recover corrupted or deleted files using signature and partition analysis.
+
 ## Tools
 - Windows: PhotoRec, Recuva
 - Kali: PhotoRec, TestDisk

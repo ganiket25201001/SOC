@@ -3,6 +3,9 @@
 ## Objective
 Extract and analyze registry hives for user activity, typed URLs, and executed programs.
 
+## Aim (From CF.txt)
+To extract user activity, typed URLs, and recently accessed files from registry hives.
+
 ## Tools
 - Windows: FTK Imager, Registry Explorer, Autopsy
 - Kali: RegRipper (rip.pl)

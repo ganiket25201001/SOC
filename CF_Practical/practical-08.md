@@ -3,6 +3,9 @@
 ## Objective
 Reconstruct user web activity using browser history and cache artifacts.
 
+## Aim (From CF.txt)
+To reconstruct browsing history and cache.
+
 ## Tools
 - Windows: Browser History Examiner, ChromeCacheViewer
 - Kali: sqlite3, strings

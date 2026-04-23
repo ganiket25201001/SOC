@@ -3,6 +3,9 @@
 ## Objective
 Recover deleted or hidden files from unallocated space using at least three tools.
 
+## Aim (From CF.txt)
+To recover files based on file signatures (headers/footers) from unallocated space.
+
 ## Tools
 - Windows: Autopsy, FTK Imager
 - Kali: Scalpel

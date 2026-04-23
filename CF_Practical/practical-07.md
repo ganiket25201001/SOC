@@ -3,6 +3,9 @@
 ## Objective
 Identify sender/recipient metadata, message routing, and attachments from email evidence.
 
+## Aim (From CF.txt)
+To analyze email headers (IP addresses, X-headers) and attachments.
+
 ## Tools
 - Windows: FTK Imager, Autopsy
 - Kali: mailx, grep/awk, munpack

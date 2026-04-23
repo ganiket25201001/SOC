@@ -3,6 +3,9 @@
 ## Objective
 Analyze RAM to identify suspicious processes, drivers, network activity, and command history.
 
+## Aim (From CF.txt)
+To analyze RAM for running processes, malware, and unsaved documents.
+
 ## Tools
 - Windows: FTK Imager (capture), Mandiant Redline (analysis)
 - Kali: Volatility 3

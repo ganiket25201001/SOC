@@ -3,6 +3,9 @@
 ## Objective
 Analyze file system structure, metadata, inodes, and timeline artifacts.
 
+## Aim (From CF.txt)
+To analyze file system metadata, inodes, and directory structures.
+
 ## Tools
 - Windows: Autopsy, FTK Imager
 - Kali: Sleuth Kit (mmls, fsstat, fls, istat, icat)

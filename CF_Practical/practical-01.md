@@ -3,6 +3,9 @@
 ## Objective
 Create a bit-stream forensic image of a device and verify integrity hashes.
 
+## Aim (From CF.txt)
+To create a mathematically verifiable bit-stream copy of a digital device.
+
 ## Tools
 - Windows: FTK Imager
 - Kali: Guymager, dcfldd
