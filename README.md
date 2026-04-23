@@ -24,15 +24,15 @@ This repository currently contains two practical sets:
 
 Source file: `CF,txt`
 
-1. [Practical 1 - Creating a Forensic Image using tools like FTK Imager, Guymager, dd (command-line tool).](CF_Practical/practical-01.md) - Date: 20-01-2026 | Pages: 1-6
-2. [Practical 2 - Use data carving tools like FTK Imager, Autopsy, Scalpel, etc. to recover deleted or hidden data from a digital device. Use minimum three tools.](CF_Practical/practical-02.md) - Date: 21-01-2026 | Pages: 7-12
-3. [Practical 3 - File System Analysis using the Sleuth Kit (TSK).](CF_Practical/practical-03.md) - Date: 02-02-2026 | Pages: 13-18
-4. [Practical 4 - Extract and analysis registry data using tools like FTK Imager, Autopsy, Registry Explorer, etc. Use minimum three tools.](CF_Practical/practical-04.md) - Date: 23-02-2026 | Pages: 19-22
-5. [Practical 5 - Perform network forensics using tools like Wireshark, NetworkMiner, tcpdump, etc. Use minimum three tools.](CF_Practical/practical-05.md) - Date: 10-03-2026 | Pages: 23-25
-6. [Practical 6 - Study volatile memory from a computer to identify running processes, loaded drivers, and other information using tools like Volatility Framework, FTK Imager, redline, etc. Use minimum three tools.](CF_Practical/practical-06.md) - Date: 07-04-2026 | Pages: 26-29
-7. [Practical 7 - Examine email files to identify senders, recipients, attachments, and other information using tools like FTK Imager, EnCase Forensic Toolkit, MailX (command-line tool), etc. Use minimum three tools.](CF_Practical/practical-07.md) - Date: 13-04-2026 | Pages: 30-31
-8. [Practical 8 - Study internet artifact analysis to examine web browsing history, chat logs, and other internet artifacts to identify user activity using Browser History Examiner and ChromeCacheViewer.](CF_Practical/practical-08.md) - Date: 13-04-2026 | Pages: 32-33
-9. [Practical 9 - Using tools like Test Disk, Recuva, PhotoRec, etc. recover the deleted or corrupted files from storage media. Use minimum three tools.](CF_Practical/practical-09.md) - Date: Not provided | Pages: Not provided
+1. [Practical 1 - Creating a Forensic Image using tools like FTK Imager, Guymager, dd (command-line tool).](CF_Practical/practical-01.md) - 
+2. [Practical 2 - Use data carving tools like FTK Imager, Autopsy, Scalpel, etc. to recover deleted or hidden data from a digital device. Use minimum three tools.](CF_Practical/practical-02.md) 
+3. [Practical 3 - File System Analysis using the Sleuth Kit (TSK).](CF_Practical/practical-03.md) 
+4. [Practical 4 - Extract and analysis registry data using tools like FTK Imager, Autopsy, Registry Explorer, etc. Use minimum three tools.](CF_Practical/practical-04.md) 
+5. [Practical 5 - Perform network forensics using tools like Wireshark, NetworkMiner, tcpdump, etc. Use minimum three tools.](CF_Practical/practical-05.md)
+6. [Practical 6 - Study volatile memory from a computer to identify running processes, loaded drivers, and other information using tools like Volatility Framework, FTK Imager, redline, etc. Use minimum three tools.](CF_Practical/practical-06.md)
+7. [Practical 7 - Examine email files to identify senders, recipients, attachments, and other information using tools like FTK Imager, EnCase Forensic Toolkit, MailX (command-line tool), etc. Use minimum three tools.](CF_Practical/practical-07.md) 
+8. [Practical 8 - Study internet artifact analysis to examine web browsing history, chat logs, and other internet artifacts to identify user activity using Browser History Examiner and ChromeCacheViewer.](CF_Practical/practical-08.md) 
+9. [Practical 9 - Using tools like Test Disk, Recuva, PhotoRec, etc. recover the deleted or corrupted files from storage media. Use minimum three tools.](CF_Practical/practical-09.md) 
 
 ## How to Use These Files
 
